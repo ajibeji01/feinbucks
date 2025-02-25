@@ -2,6 +2,19 @@ from flask import Flask, render_template, request, jsonify
 import json
 import random
 import os
+import requests
+import threading
+
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
+def send_backup(string, file):
+    formatted =\
+f"""**NEW LOG**
+for *{file}*
+```
+{string}
+```
+"""
+    response = requests.post(DISCORD_WEBHOOK_URL, json={"content": formatted})
 
 app = Flask(__name__)
 
@@ -18,6 +31,7 @@ def load_data(file=DATA_FILE):
 def save_data(data, file=DATA_FILE):
     with open(file, "w") as f:
         json.dump(data, f, indent=4)
+        threading.Thread(target=send_backup, args=[json.dumps(data, indent=4), file]).start()
 
 @app.route("/")
 def home():
@@ -188,7 +202,6 @@ def save_limiteds(data):
 
 @app.route("/marketplace/<username>", methods=["GET"])
 def marketplace(username):
-    print("Marketplace Backend Fired")
     data = load_limiteds()
 
     if not username:
@@ -200,10 +213,12 @@ def marketplace(username):
     for limited_name, details in data.items():
         for copy, owner_data in details["owners"].items():
             if owner_data["name"] == username:
-                owned_limiteds[limited_name] = {
+                if limited_name not in owned_limiteds:
+                    owned_limiteds[limited_name] = []
+                owned_limiteds[limited_name].append({
                     "copy": copy,
                     "market": owner_data["market"]
-                }
+                })
             if owner_data["market"]:
                 if limited_name not in marketplace_limiteds:
                     marketplace_limiteds[limited_name] = []
@@ -212,8 +227,16 @@ def marketplace(username):
                     "seller": owner_data["name"],
                     "price": owner_data["market"]
                 })
-    print("Sending..")
-    print({"owned": owned_limiteds, "market": marketplace_limiteds})
+
+        if int(details["copies"]) > len(details["owners"]):
+            if limited_name not in marketplace_limiteds:
+                marketplace_limiteds[limited_name] = []
+            marketplace_limiteds[limited_name].append({
+                "copy": str(len(details["owners"])+1),
+                "seller": "Feinbank",
+                "price": details["price"]
+            })
+
     return jsonify({"owned": owned_limiteds, "market": marketplace_limiteds})
 
 @app.route("/sell_limited", methods=["POST"])
@@ -223,43 +246,62 @@ def sell_limited():
     username = req.get("username")
     limited_name = req.get("limited")
     price = req.get("price")
+    limited_copy = req.get("copy")
 
-    if not username or not limited_name or not price:
+    if not username or not limited_name:
         return jsonify({"error": "Invalid request"}), 400
 
     if limited_name not in data:
         return jsonify({"error": "Limited does not exist"}), 404
 
-    for owner_id, owner_data in data[limited_name]["owners"].items():
-        if owner_data["name"] == username:
-            owner_data["market"] = price
-            save_limiteds(data)
-            return jsonify({"success": True})
+    owner_data = data[limited_name]["owners"][limited_copy]
+    owner_data["market"] = price
+    save_limiteds(data)
+    return jsonify({"success": True})
 
     return jsonify({"error": "You do not own this limited"}), 403
 
 @app.route("/buy_limited", methods=["POST"])
 def buy_limited():
-    data = load_limiteds()
+    data = load_data()
+    limited_data = load_limiteds()
     req = request.json
     username = req.get("username")
     limited_name = req.get("limited")
+    limited_copy = req.get("copy")
     seller = req.get("seller")
     price = req.get("price")
 
     if not username or not limited_name or not seller or not price:
         return jsonify({"error": "Invalid request"}), 400
 
-    if limited_name not in data:
+    if limited_name not in limited_data:
         return jsonify({"error": "Limited does not exist"}), 404
 
-    for owner_id, owner_data in data[limited_name]["owners"].items():
-        if owner_data["name"] == seller and owner_data["market"] == str(price):
-            # Transfer ownership
-            owner_data["market"] = ""
-            owner_data["name"] = username
-            save_limiteds(data)
-            return jsonify({"success": True})
+
+    # Validate Transaction
+    if float(data[username]["Feinbucks"]) < float(price):
+        return jsonify({"error": "You are too poor to buy this limited"})
+
+    # Complete Transaction
+    data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - price, 2))
+    if seller != "Feinbank":
+        data[seller]["Feinbucks"] = str(round(float(data[seller]["Feinbucks"]) + price, 2))
+
+    # Transfer ownership
+    if limited_copy in limited_data[limited_name]["owners"]:
+        copy_data = limited_data[limited_name]["owners"][limited_copy]
+        copy_data["market"] = ""
+        copy_data["name"] = username
+    else:
+        limited_data[limited_name]["owners"][limited_copy] = {
+            "name": username,
+            "market": ""
+        }
+
+    save_limiteds(limited_data)
+    save_data(data)
+    return jsonify({"success": True})
 
     return jsonify({"error": "Limited is no longer available"}), 404
 
