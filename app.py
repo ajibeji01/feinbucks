@@ -60,7 +60,7 @@ def signup():
     if len(username) < 3 or len(username) > 20:
         return jsonify({"error": "Usernames must be between 3-20 characters"})
 
-    data[username] = {"Password": password, "Notes": "", "Feinbucks": "0"}
+    data[username] = {"Password": password, "Feinbucks": "0"}
     save_data(data)
     return jsonify({"message": "Signup successful"}), 201
 
@@ -76,8 +76,7 @@ def login():
 
     return jsonify({
         "message": "Login successful",
-        "Feinbucks": data[username]["Feinbucks"],
-        "Notes": data[username]["Notes"]
+        "Feinbucks": data[username]["Feinbucks"]
     })
 
 @app.route("/balance/<username>", methods=["GET"])
