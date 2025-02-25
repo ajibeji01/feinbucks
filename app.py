@@ -88,21 +88,23 @@ def get_balance(username):
 
     return jsonify({"Feinbucks": data[username]["Feinbucks"]})
 
-@app.route("/notes/<username>", methods=["GET", "POST"])
-def manage_notes(username):
+@app.route("/changePassword/<username>", methods=["POST"])
+def change_password(username):
     data = load_data()
     if username not in data:
         return jsonify({"error": "User not found"}), 404
 
-    if request.method == "GET":
-        return jsonify({"Notes": data[username]["Notes"]})
+    req = request.json
+    old = req.get("old")
+    new = req.get("New")
 
-    elif request.method == "POST":
-        req = request.json
-        new_notes = req.get("notes", "")
-        data[username]["Notes"] = new_notes
-        save_data(data)
-        return jsonify({"message": "Notes updated successfully"})
+    if old != data[username]["Password"]:
+        return jsonify({"error": "Incorrect original password"})
+
+    data[username]["Password"] = new
+    save_data(data)
+
+    return jsonify({})
 
 @app.route("/gamble/<username>", methods=["POST"])
 def gamble(username):
