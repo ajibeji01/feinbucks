@@ -20,6 +20,7 @@ function logout() {
 function dashboard() {
     document.getElementById("login_block").style.display = "none";
 
+    document.getElementById("password_block").style.display = "none";
     document.getElementById("gamble_block").style.display = "none";
     document.getElementById("codes_block").style.display = "none";
     document.getElementById("transfer_block").style.display = "none";
@@ -80,6 +81,39 @@ function getBalance() {
     fetch(`/balance/${loggedInUser}`)
     .then(res => res.json())
     .then(data => document.getElementById("balance").innerText = "Balance: F$" + data.Feinbucks);
+}
+
+function changePassword() {
+    if (!loggedInUser) {
+        alert("Please log in first!");
+        return;
+    }
+
+    let old = document.getElementById("old_password").value;
+    let New = document.getElementById("new_password").value;
+    let new_confirm = document.getElementById("confirm_new_password").value;
+
+    if (New != new_confirm) {
+        document.getElementById("passwordResult").innerText = "New passwords don't match";
+        document.getElementById("passwordResult").style.color = "rgb(200,0,0)";
+        return;
+    }
+
+    fetch(`/changePassword/${loggedInUser}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ old, New })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById("passwordResult").innerText = data.error;
+            document.getElementById("passwordResult").style.color = "rgb(200,0,0)";
+        } else {
+            document.getElementById("passwordResult").innerText = "Successfully updated password";
+            document.getElementById("passwordResult").style.color = "rgb(0,0,0)";
+        }
+    });
 }
 
 function gamble() {
@@ -269,6 +303,15 @@ async function buyLimited(limitedName, limitedCopy, seller, price) {
         document.getElementById("marketResult").innerText = "Error: " + data.error;
         document.getElementById("marketResult").style.color = "rgb(200,0,0)";
     }
+}
+
+function passwordUI() {
+    if (!loggedInUser) {
+        alert("Please log in first!");
+        return;
+    }
+    dashboard()
+    document.getElementById("password_block").style.display = "block";
 }
 
 function gambleUI() {
