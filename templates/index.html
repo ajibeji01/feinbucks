@@ -23,11 +23,21 @@
 
     <div id="action_block" style="display:none;">
         <p>Choose an action</p>
+        <button onclick="passwordUI()">Change Password</button>
         <button onclick="gambleUI()">Gamble</button>
         <button onclick="codesUI()">Claim Codes</button>
         <button onclick="transferUI()">Transfer Feinbucks</button>
         <button onclick="limitedsUI()">Limiteds</button>
         <!-- button>Coming soon..</button>  -->
+    </div>
+
+    <div id="password_block" style="display:none;">
+        <h2>Change Password</h2>
+        <input type="password" id="old_password" placeholder="Old Password"> <br>
+        <input type="password" id="new_password" placeholder="New Password"> <br>
+        <input type="password" id="confirm_new_password" placeholder="Confirm New Password"> <br>
+        <button onclick="changePassword()">Change</button>
+        <p id="passwordResult"></p>
     </div>
 
     <div id="gamble_block" style="display:none;">
