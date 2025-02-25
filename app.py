@@ -20,6 +20,8 @@ app = Flask(__name__)
 
 # Load user data
 DATA_FILE = "passwords.json"
+LIMITEDS_FILE = "limiteds.json"
+
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, "w") as f:
         json.dump({}, f)
@@ -188,21 +190,10 @@ def transfer(username):
 
     return jsonify({})
 
-LIMITEDS_FILE = "limiteds.json"
-
-def load_limiteds():
-    if not os.path.exists(LIMITEDS_FILE):
-        return {}
-    with open(LIMITEDS_FILE, "r") as f:
-        return json.load(f)
-
-def save_limiteds(data):
-    with open(LIMITEDS_FILE, "w") as f:
-        json.dump(data, f, indent=4)
 
 @app.route("/marketplace/<username>", methods=["GET"])
 def marketplace(username):
-    data = load_limiteds()
+    data = load_data(LIMITEDS_FILE)
 
     if not username:
         return jsonify({"error": "Username required"}), 400
@@ -241,7 +232,7 @@ def marketplace(username):
 
 @app.route("/sell_limited", methods=["POST"])
 def sell_limited():
-    data = load_limiteds()
+    data = load_data(LIMITEDS_FILE)
     req = request.json
     username = req.get("username")
     limited_name = req.get("limited")
@@ -256,7 +247,7 @@ def sell_limited():
 
     owner_data = data[limited_name]["owners"][limited_copy]
     owner_data["market"] = price
-    save_limiteds(data)
+    save_data(data, LIMITEDS_FILE)
     return jsonify({"success": True})
 
     return jsonify({"error": "You do not own this limited"}), 403
@@ -264,7 +255,7 @@ def sell_limited():
 @app.route("/buy_limited", methods=["POST"])
 def buy_limited():
     data = load_data()
-    limited_data = load_limiteds()
+    limited_data = load_data(LIMITEDS_FILE)
     req = request.json
     username = req.get("username")
     limited_name = req.get("limited")
@@ -299,7 +290,7 @@ def buy_limited():
             "market": ""
         }
 
-    save_limiteds(limited_data)
+    save_data(limited_data, LIMITEDS_FILE)
     save_data(data)
     return jsonify({"success": True})
 
