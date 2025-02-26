@@ -5,27 +5,38 @@ import os
 import requests
 import threading
 import time
+import math
 
 DISCORD_BACKUP_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
 DISCORD_ACTION_WEBHOOK_URL = "https://discord.com/api/webhooks/1344205724343074826/SLjrdf7cMwW-kFngyTnyS2Tn0FTmphrwk8Ub_fC1Xpaa_pA_DChsOAiCHkjaw8YEOZo7"
 
 LAST_BACKUPS = {}
+BACKUP_BATCH_SIZE = 1800
 
 def send_backup(string, file):
     if time.time() - (LAST_BACKUPS[file] if file in LAST_BACKUPS else 0) < 300:
-        print(LAST_BACKUPS)
-        print(time.time())
-        print((LAST_BACKUPS[file] if file in LAST_BACKUPS else 0))
         return
     LAST_BACKUPS[file] = time.time()
-    formatted =\
+    batches = []
+    for i in range(math.ceil(len(string)/BACKUP_BATCH_SIZE)):
+        if i == 0:
+            formatted =\
 f"""**NEW LOG**
 for *{file}*
 ```
-{string}
+{string[i*BACKUP_BATCH_SIZE:(i+1)*BACKUP_BATCH_SIZE]}
 ```
 """
-    response = requests.post(DISCORD_BACKUP_WEBHOOK_URL, json={"content": formatted})
+            response = requests.post(DISCORD_BACKUP_WEBHOOK_URL, json={"content": formatted})
+        else:
+            formatted = \
+f"""
+```
+{string[i*BACKUP_BATCH_SIZE:(i+1)*BACKUP_BATCH_SIZE]}
+```
+"""
+            response = requests.post(DISCORD_BACKUP_WEBHOOK_URL, json={"content": formatted})
+
 
 def log_action(string):
     formatted =\
