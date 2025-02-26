@@ -9,11 +9,12 @@ import time
 DISCORD_BACKUP_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
 DISCORD_ACTION_WEBHOOK_URL = "https://discord.com/api/webhooks/1344205724343074826/SLjrdf7cMwW-kFngyTnyS2Tn0FTmphrwk8Ub_fC1Xpaa_pA_DChsOAiCHkjaw8YEOZo7"
 
-last_backup = time.time()
+LAST_BACKUPS = {}
+
 def send_backup(string, file):
-    if time.time() - last_backup < 300:
+    if time.time() - (LAST_BACKUPS[file] if file in LAST_BACKUPS else 0) < 300:
         return
-    last_backup = time.time()
+    LAST_BACKUPS[file] = time.time()
     formatted =\
 f"""**NEW LOG**
 for *{file}*
@@ -325,6 +326,9 @@ def buy_limited():
 
         if not limited_data[limited_name]["owners"][limited_copy]["market"]:
             return jsonify({"error": "Limited is no longer for sale. Refresh limiteds page"}), 404
+
+        if limited_data[limited_name]["owners"][limited_copy]["market"] != str(price):
+            return jsonify({"error": "Limited's value changed price'. Refresh limiteds page"}), 404
 
         data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - price, 2))
         data[seller]["Feinbucks"] = str(round(float(data[seller]["Feinbucks"]) + price, 2))
