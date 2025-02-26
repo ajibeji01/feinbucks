@@ -138,7 +138,7 @@ def gamble(username):
 
     if bet <= 0:
         return jsonify({"error": "You must bet a positive amount"}), 400
-    elif bet <= 0.01:
+    elif bet < 0.01:
         return jsonify({"error": "You must bet at least 1 feincent"}), 400
     elif feinbucks < bet:
         return jsonify({"error": "You're too poor for this"}), 400
@@ -202,8 +202,10 @@ def transfer(username):
 
     if amount <= 0:
         return jsonify({"error": "You can only transfer a positive amount"})
-    elif amount <= 0.01:
+    elif amount < 0.01:
         return jsonify({"error": "You must transfer at least 1 feincent"})
+    elif amount > float(data[username]["Feinbucks"]):
+        return jsonify({"error": "You don't have enough feinbucks for that >:)"})
 
     data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - amount, 2))
     data[recipient]["Feinbucks"] = str(round(float(data[recipient]["Feinbucks"]) + amount, 2))
@@ -299,21 +301,30 @@ def buy_limited():
         return jsonify({"error": "Limited does not exist"}), 404
 
 
+
+
     # Validate Transaction
     if float(data[username]["Feinbucks"]) < float(price):
         return jsonify({"error": "You are too poor to buy this limited"})
 
-    # Complete Transaction
-    data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - price, 2))
-    if seller != "Feinbank":
-        data[seller]["Feinbucks"] = str(round(float(data[seller]["Feinbucks"]) + price, 2))
 
     # Transfer ownership
-    if limited_copy in limited_data[limited_name]["owners"]:
+    # if limited_copy in limited_data[limited_name]["owners"]:                               # If buying off a player
+    if seller != "Feinbank":
+
+        if not limited_data[limited_name]["owners"][limited_copy]["market"]:
+            return jsonify({"error": "Limited is no longer for sale. Refresh limiteds page"}), 404
+
+        data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - price, 2))
+        data[seller]["Feinbucks"] = str(round(float(data[seller]["Feinbucks"]) + price, 2))
         copy_data = limited_data[limited_name]["owners"][limited_copy]
         copy_data["market"] = ""
         copy_data["name"] = username
-    else:
+    else:                                                                                  # If buying off the bank
+        if len(limited_data[limited_name]["owners"]) >= int(limited_copy):
+            return jsonify({"error": "Someone already bought that copy. Refresh limiteds page."}), 404
+
+        data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - price, 2))
         limited_data[limited_name]["owners"][limited_copy] = {
             "name": username,
             "market": ""
