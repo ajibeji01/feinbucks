@@ -5,7 +5,9 @@ import os
 import requests
 import threading
 
-DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
+DISCORD_BACKUP_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
+DISCORD_ACTION_WEBHOOK_URL = "https://discord.com/api/webhooks/1344205724343074826/SLjrdf7cMwW-kFngyTnyS2Tn0FTmphrwk8Ub_fC1Xpaa_pA_DChsOAiCHkjaw8YEOZo7"
+
 def send_backup(string, file):
     formatted =\
 f"""**NEW LOG**
@@ -14,7 +16,14 @@ for *{file}*
 {string}
 ```
 """
-    response = requests.post(DISCORD_WEBHOOK_URL, json={"content": formatted})
+    response = requests.post(DISCORD_BACKUP_WEBHOOK_URL, json={"content": formatted})
+
+def log_action(string):
+    formatted =\
+f"""## NEW ACTION
+> {string}
+"""
+    response = requests.post(DISCORD_ACTION_WEBHOOK_URL, json={"content": formatted})
 
 app = Flask(__name__)
 
@@ -37,7 +46,7 @@ def save_data(data, file=DATA_FILE):
 
 @app.route("/")
 def home():
-    return render_template("index.html")  # Now serving a proper HTML file
+    return render_template("index.html")
 
 @app.route("/info/<user>", methods=["GET"])
 def info(user):
@@ -62,6 +71,8 @@ def signup():
 
     data[username] = {"Password": password, "Feinbucks": "0"}
     save_data(data)
+    threading.Thread(target=log_action,
+                     args=[f"**New account created:** Username: **{username}** Password: ||**{password}**||"]).start()
     return jsonify({"message": "Signup successful"}), 201
 
 @app.route("/login", methods=["POST"])
@@ -73,6 +84,9 @@ def login():
 
     if username not in data or data[username]["Password"] != password:
         return jsonify({"error": "Invalid username or password"}), 401
+
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** logged in to their account."]).start()
 
     return jsonify({
         "message": "Login successful",
@@ -102,6 +116,8 @@ def change_password(username):
 
     data[username]["Password"] = new
     save_data(data)
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** changed their password: Old: ||**{old}**|| New: ||**{new}**||"]).start()
 
     return jsonify({})
 
@@ -132,6 +148,8 @@ def gamble(username):
     winnings = bet * result
     data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) + winnings, 2))
     save_data(data)
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** gambled some feinbucks: Bet: **{bet}** Winnings: **{winnings}** Profit: **{str(winnings-bet)}**"]).start()
 
     return jsonify({"result": result, "winnings": winnings})
 
@@ -157,6 +175,8 @@ def claimCode(username):
     data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) + winnings, 2))
     save_data(code_data, "codes.json")
     save_data(data)
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** claimed a code: Code: **{code}** Winnings: **{winnings}**"]).start()
 
     return jsonify({"winnings": winnings})
 
@@ -188,6 +208,8 @@ def transfer(username):
     data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) - amount, 2))
     data[recipient]["Feinbucks"] = str(round(float(data[recipient]["Feinbucks"]) + amount, 2))
     save_data(data)
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** transfered **{amount}** feinbucks to **{recipient}**."]).start()
 
     return jsonify({})
 
@@ -246,12 +268,18 @@ def sell_limited():
     if limited_name not in data:
         return jsonify({"error": "Limited does not exist"}), 404
 
+    if username != data[limited_name]["owners"][limited_copy]["name"]:
+        return jsonify({"error": "You do not own this limited"}), 403
+
     owner_data = data[limited_name]["owners"][limited_copy]
     owner_data["market"] = price
     save_data(data, LIMITEDS_FILE)
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** put their **{limited_name} #{limited_copy}** on the market for **{price}** feinbucks."]).start()
+
     return jsonify({"success": True})
 
-    return jsonify({"error": "You do not own this limited"}), 403
+
 
 @app.route("/buy_limited", methods=["POST"])
 def buy_limited():
@@ -293,6 +321,9 @@ def buy_limited():
 
     save_data(limited_data, LIMITEDS_FILE)
     save_data(data)
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** bought **{limited_name} #{limited_copy}** from **{seller}** for **{price}** feinbucks."]).start()
+
     return jsonify({"success": True})
 
     return jsonify({"error": "Limited is no longer available"}), 404
