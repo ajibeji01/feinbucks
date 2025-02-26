@@ -58,10 +58,16 @@ def info(user):
 
 @app.route("/signup", methods=["POST"])
 def signup():
+    allowed_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+
     data = load_data()
     req = request.json
     username = req.get("username")
     password = req.get("password")
+
+    for c in username:
+        if c not in allowed_characters:
+            return jsonify({"error": f"'{c}' is a disallowed character"})
 
     if username in data:
         return jsonify({"error": "Username already taken"}), 400
