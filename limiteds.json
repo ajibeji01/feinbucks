@@ -2,7 +2,12 @@
     "fein emblem": {
         "price": "200",
         "copies": "3",
-        "owners": {}
+        "owners": {
+             "1": {
+                "market": "",
+                "name": "oliver"
+            }
+        }
     },
     "skibidi sword": {
         "price": "50",
