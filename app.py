@@ -13,6 +13,9 @@ LAST_BACKUPS = {}
 
 def send_backup(string, file):
     if time.time() - (LAST_BACKUPS[file] if file in LAST_BACKUPS else 0) < 300:
+        print(LAST_BACKUPS)
+        print(time.time())
+        print((LAST_BACKUPS[file] if file in LAST_BACKUPS else 0))
         return
     LAST_BACKUPS[file] = time.time()
     formatted =\
