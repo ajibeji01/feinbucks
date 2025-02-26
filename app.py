@@ -150,8 +150,8 @@ def gamble(username):
 
     if bet <= 0:
         return jsonify({"error": "You must bet a positive amount"}), 400
-    elif bet < 0.01:
-        return jsonify({"error": "You must bet at least 1 feincent"}), 400
+    elif bet < 0.05:
+        return jsonify({"error": "You must bet at least 5 feincents"}), 400
     elif feinbucks < bet:
         return jsonify({"error": "You're too poor for this"}), 400
 
