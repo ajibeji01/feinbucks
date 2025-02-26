@@ -68,7 +68,10 @@ function signup() {
     .then(data => {
         if (data.error) {
             document.getElementById("loginResult").innerText = data.error;
+        } else {
+            login()
         }
+
     });
 }
 
@@ -282,7 +285,7 @@ async function takeOffLimited(limitedName, limitedCopy) {
         document.getElementById("marketResult").style.color = "rgb(0,0,0)";
         loadMarketplace();
     } else {
-        document.getElementById("marketResult").innerText = "Error: " + data.error;
+        document.getElementById("marketResult").innerText = data.error;
         document.getElementById("marketResult").style.color = "rgb(200,0,0)";
     }
 }
@@ -299,8 +302,9 @@ async function buyLimited(limitedName, limitedCopy, seller, price) {
         document.getElementById("marketResult").innerText = "Limited bought successfully";
         document.getElementById("marketResult").style.color = "rgb(0,0,0)";
         loadMarketplace();
+        getBalance();
     } else {
-        document.getElementById("marketResult").innerText = "Error: " + data.error;
+        document.getElementById("marketResult").innerText = data.error;
         document.getElementById("marketResult").style.color = "rgb(200,0,0)";
     }
 }
