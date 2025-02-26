@@ -4,11 +4,16 @@ import random
 import os
 import requests
 import threading
+import time
 
 DISCORD_BACKUP_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
 DISCORD_ACTION_WEBHOOK_URL = "https://discord.com/api/webhooks/1344205724343074826/SLjrdf7cMwW-kFngyTnyS2Tn0FTmphrwk8Ub_fC1Xpaa_pA_DChsOAiCHkjaw8YEOZo7"
 
+last_backup = time.time()
 def send_backup(string, file):
+    if time.time() - last_backup < 300:
+        return
+    last_backup = time.time()
     formatted =\
 f"""**NEW LOG**
 for *{file}*
