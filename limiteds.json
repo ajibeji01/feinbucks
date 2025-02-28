@@ -22,8 +22,8 @@
         "copies": "5",
         "owners": {
             "1": {
-                "market": "",
-                "name": "leo"
+                "market": "9.9e+99",
+                "name": "benny"
             },
             "2": {
                 "market": "",
@@ -38,8 +38,8 @@
                 "name": "arthur"
             },
             "5": {
-                "market": "149.99",
-                "name": "benny"
+                "market": "",
+                "name": "lamborghini"
             }
         }
     },
@@ -70,7 +70,7 @@
                 "market": ""
             },
             "4": {
-                "name": "codidopoo",
+                "name": "leo",
                 "market": ""
             },
             "5": {
@@ -109,7 +109,31 @@
             },
             "2": {
                 "market": "",
-                "name": "codidopoo"
+                "name": "leo"
+            },
+            "3": {
+                "market": "",
+                "name": "feinbank"
+            }
+        }
+    },
+    "skib string": {
+        "price": "5",
+        "copies": "20",
+        "owners": {
+            "1": {
+                "market": "",
+                "name": "feinbank"
+            }
+        }
+    },
+    "mewer's medallion": {
+        "price": "30",
+        "copies": "6",
+        "owners": {
+            "1": {
+                "market": "",
+                "name": "louis"
             }
         }
     }
