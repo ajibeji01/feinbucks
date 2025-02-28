@@ -24,6 +24,7 @@
     <div id="action_block" style="display:none;">
         <p>Choose an action</p>
         <button onclick="passwordUI()">Change Password</button>
+        <button onclick="miningUI()">Claim Mining</button>
         <button onclick="gambleUI()">Gamble</button>
         <button onclick="codesUI()">Claim Codes</button>
         <button onclick="transferUI()">Transfer Feinbucks</button>
@@ -39,6 +40,16 @@
         <button onclick="changePassword()">Change</button>
         <p id="passwordResult"></p>
     </div>
+
+    <div id="mining_block" style="display:none;">
+        <h2>Claim Mining Work</h2>
+        <input type="text" id="hash_input" placeholder="Hash Input">
+        <button onclick="claimHash()">Claim</button>
+        <p id="claimResult"></p>
+        <p>To mine feinbucks you must run a python script on your computer.</p>
+        <p>If you are interested in mining feinbucks, contact the Feinbank for instructions</p>
+    </div>
+
 
     <div id="gamble_block" style="display:none;">
         <h2>Gambling</h2>
