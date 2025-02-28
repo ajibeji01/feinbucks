@@ -6,6 +6,7 @@ import requests
 import threading
 import time
 import math
+import hashlib
 
 DISCORD_BACKUP_WEBHOOK_URL = "https://discord.com/api/webhooks/1344040756263915580/2XZ5MdnNZW01khNcaMQCzNeMv9hzZuLFxavURFwHakFePK1N4GbOhW8CK2xaRw8DcL79"
 DISCORD_ACTION_WEBHOOK_URL = "https://discord.com/api/webhooks/1344205724343074826/SLjrdf7cMwW-kFngyTnyS2Tn0FTmphrwk8Ub_fC1Xpaa_pA_DChsOAiCHkjaw8YEOZo7"
@@ -146,6 +147,45 @@ def change_password(username):
                      args=[f"**{username}** changed their password: Old: ||**{old}**|| New: ||**{new}**||"]).start()
 
     return jsonify({})
+
+@app.route("/claimHash/<username>", methods=["POST"])
+def claim_hash(username):
+    rewards = {"7": 0.5, "8": 10, "9": 200, "10": 1000, "11": 15000, "12": 250000}
+
+    def count_leading_zeros(hash_str):
+        return len(hash_str) - len(hash_str.lstrip('0'))
+
+    data = load_data()
+    hashes_data = load_data("hashes.json")
+    if username not in data:
+        return jsonify({"error": "User not found"}), 404
+
+    req = request.json
+    hashInput = req.get("hashInput")
+    hashResult = hashlib.sha256(hashInput.encode()).hexdigest()
+    leading = str(count_leading_zeros(hashResult))
+
+    if leading not in rewards:
+        return jsonify({"error": f"{hashResult}\nInvalid hash result (7+ leading zeros required)"})
+
+    if not hashInput.endswith("feinbucks"):
+        return jsonify({"error": f"Hash input must end with 'feinbucks' for verification"})
+
+    if hashInput in hashes_data:
+        return jsonify({"error": f"Hash was already claimed by {hashes_data[hashInput]}"})
+
+    hashes_data[hashInput] = username
+    
+    winnings = rewards[leading]
+
+    data[username]["Feinbucks"] = str(float(data[username]["Feinbucks"]) + winnings)
+
+    save_data(data)
+    save_data(hashes_data, "hashes.json")
+    threading.Thread(target=log_action,
+                     args=[f"**{username}** claimed a hash!: Length **{leading}** Winnings: {str(winnings)}"]).start()
+
+    return jsonify({ "winnings": str(winnings) })
 
 @app.route("/gamble/<username>", methods=["POST"])
 def gamble(username):
