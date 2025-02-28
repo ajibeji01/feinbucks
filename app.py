@@ -150,7 +150,7 @@ def change_password(username):
 
 @app.route("/claimHash/<username>", methods=["POST"])
 def claim_hash(username):
-    rewards = {"7": 0.5, "8": 10, "9": 200, "10": 1000, "11": 15000, "12": 250000}
+    rewards = {"7": 0.5, "8": 5, "9": 80, "10": 1000, "11": 15000, "12": 250000}
 
     def count_leading_zeros(hash_str):
         return len(hash_str) - len(hash_str.lstrip('0'))
@@ -211,7 +211,7 @@ def gamble(username):
 
     data[username]["Feinbucks"] = str(feinbucks - bet)
     result = random.choices([0, 1.2, 1.5, 2], weights=[40, 30, 20, 10])[0]
-    winnings = bet * result
+    winnings = round(bet * result, 2)
     data[username]["Feinbucks"] = str(round(float(data[username]["Feinbucks"]) + winnings, 2))
     save_data(data)
     threading.Thread(target=log_action,
