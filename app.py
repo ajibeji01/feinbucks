@@ -75,7 +75,7 @@ def info(user):
     if user not in data:
         return jsonify({"error": "User not found"}), 404
 
-    return jsonify({"message": f"Test complete. Data found: F${data[user]['Feinbucks']}, Password: {data[user]['Password']}"})
+    return jsonify({"message": f"Test complete. User found."})
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -110,6 +110,8 @@ def login():
     password = req.get("password")
 
     if username not in data or data[username]["Password"] != password:
+        threading.Thread(target=log_action,
+                         args=[f"Failed password attempt for **{username}**. Attempt: ||**{password}**||"]).start()
         return jsonify({"error": "Invalid username or password"}), 401
 
     threading.Thread(target=log_action,
