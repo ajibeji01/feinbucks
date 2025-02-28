@@ -3,9 +3,17 @@
         "price": "200",
         "copies": "3",
         "owners": {
-             "1": {
-                "market": "",
+            "1": {
+                "market": "450",
                 "name": "oliver"
+            },
+            "2": {
+                "name": "markus",
+                "market": ""
+            },
+            "3": {
+                "name": "oliver",
+                "market": "430"
             }
         }
     },
@@ -14,7 +22,7 @@
         "copies": "5",
         "owners": {
             "1": {
-                "market": "2147483648",
+                "market": "9.9e+99",
                 "name": "benny"
             },
             "2": {
@@ -26,7 +34,7 @@
                 "name": "louis"
             },
             "4": {
-                "market": "250",
+                "market": "150",
                 "name": "arthur"
             },
             "5": {
@@ -51,11 +59,11 @@
         "owners": {
             "1": {
                 "market": "",
-                "name": "oscar"
+                "name": "TheABMaster"
             },
             "2": {
                 "name": "leo",
-                "market": ""
+                "market": "400"
             },
             "3": {
                 "name": "leo",
@@ -69,13 +77,24 @@
                 "name": "leo",
                 "market": ""
             },
-            "6": {
-                "name": "arthur",
+            "6": {"name": "arthur",
+                "market": "99.99"
+            },
+            "7": {
+                "name": "TheABMaster",
+                "market": "80"
+            },
+            "8": {
+                "name": "markus",
                 "market": ""
             },
-             "7": {
+            "9": {
                 "name": "TheABMaster",
-                "market": ""
+                "market": "80"
+            },
+            "10": {
+                "name": "leo",
+                "market": "1000"
             }
         }
     },
@@ -88,8 +107,8 @@
                 "name": "louis"
             },
             "2": {
-                "market": "100",
-                "name": "liam"
+                "market": "",
+                "name": "leo"
             }
         }
     }
