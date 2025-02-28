@@ -9,6 +9,7 @@ function logout() {
     document.getElementById("action_block").style.display = "none";
     document.getElementById("logout_block").style.display = "none";
 
+
     document.getElementById("username").value = "";
     document.getElementById("password").value = "";
 
@@ -21,6 +22,7 @@ function dashboard() {
     document.getElementById("login_block").style.display = "none";
 
     document.getElementById("password_block").style.display = "none";
+    document.getElementById("mining_block").style.display = "none";
     document.getElementById("gamble_block").style.display = "none";
     document.getElementById("codes_block").style.display = "none";
     document.getElementById("transfer_block").style.display = "none";
@@ -115,6 +117,32 @@ function changePassword() {
         } else {
             document.getElementById("passwordResult").innerText = "Successfully updated password";
             document.getElementById("passwordResult").style.color = "rgb(0,0,0)";
+        }
+    });
+}
+
+function claimHash() {
+    if (!loggedInUser) {
+        alert("Please log in first!");
+        return;
+    }
+
+    let hashInput = document.getElementById("hash_input").value;
+
+    fetch(`/claimHash/${loggedInUser}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hashInput })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById("claimResult").innerText = data.error;
+            document.getElementById("claimResult").style.color = "rgb(200,0,0)";
+        } else {
+            document.getElementById("claimResult").innerText = "Thanks for mining feinbucks: +F$" + data.winnings;
+            document.getElementById("claimResult").style.color = "rgb(0,0,0)";
+            getBalance();
         }
     });
 }
@@ -316,6 +344,15 @@ function passwordUI() {
     }
     dashboard()
     document.getElementById("password_block").style.display = "block";
+}
+
+function miningUI() {
+    if (!loggedInUser) {
+        alert("Please log in first!");
+        return;
+    }
+    dashboard()
+    document.getElementById("mining_block").style.display = "block";
 }
 
 function gambleUI() {
